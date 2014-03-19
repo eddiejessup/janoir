@@ -83,8 +83,6 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     np.random.seed(seed)
     dim = 3
 
-    L_half = L / 2.0
-
     rc = np.zeros([dim])
 
     # Translational diffusion constant
@@ -94,7 +92,6 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
 
     # Rotational diffusion constant
     D_rot = D_rot_sphere(T, visc, Rp)
-    th_diff_0 = np.sqrt(2.0 * D_rot * dt)
 
     # Hydrodynamic prefactor
     v_hydro_0 = (3.0 / 16.0) * alpha * Rp ** 2 * v_propuls_0
