@@ -13,16 +13,19 @@ d_scale = 0.3
 
 def progress(obj, ev):
     fname = obj.fnames.next()
-    particlePoints = obj.points
-    pPolys = obj.pPolys
-
     dyn = np.load(fname.strip())
     rp = butils.pad_to_3d(np.array([dyn['rp']]))
 
-    particlePoints.SetData(numpy_support.numpy_to_vtk(rp))
+    obj.points.SetData(numpy_support.numpy_to_vtk(rp))
 
     vp = butils.pad_to_3d(np.array([dyn['vp']]))
-    pPolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(vp))
+    obj.pPolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(vp))
+
+    vh = butils.pad_to_3d(np.array([dyn['vh']]))
+    obj.hPolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(vh))
+
+    ve = butils.pad_to_3d(np.array([dyn['ve']]))
+    obj.ePolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(ve))
 
     renWin.Render()
 
@@ -59,24 +62,25 @@ if __name__ == '__main__':
         iren.SetRenderWindow(renWin)
         iren.Initialize()
 
-    sys = vtk.vtkCubeSource()
-    sys.SetXLength(L)
-    sys.SetYLength(L)
-    sys.SetZLength(L)
-    sysMapper = vtk.vtkPolyDataMapper()
-    sysMapper.SetInputConnection(sys.GetOutputPort())
-    sysActor = vtk.vtkActor()
-    sysActor.GetProperty().SetOpacity(0.2)
-    sysActor.SetMapper(sysMapper)
-    ren.AddActor(sysActor)
+    if np.isfinite(L):
+        sys = vtk.vtkCubeSource()
+        sys.SetXLength(L)
+        sys.SetYLength(L)
+        sys.SetZLength(L)
+        sysMapper = vtk.vtkPolyDataMapper()
+        sysMapper.SetInputConnection(sys.GetOutputPort())
+        sysActor = vtk.vtkActor()
+        sysActor.GetProperty().SetOpacity(0.2)
+        sysActor.SetMapper(sysMapper)
+        ren.AddActor(sysActor)
 
     points = vtk.vtkPoints()
     points.SetData(numpy_support.numpy_to_vtk(rc))
     polypoints = vtk.vtkPolyData()
     polypoints.SetPoints(points)
     sphereSource = vtk.vtkSphereSource()
-    sphereSource.SetThetaResolution(30)
-    sphereSource.SetPhiResolution(30)
+    sphereSource.SetThetaResolution(20)
+    sphereSource.SetPhiResolution(20)
     sphereSource.SetRadius(Rc)
     env = vtk.vtkGlyph3D()
     env.SetSourceConnection(sphereSource.GetOutputPort())
@@ -87,6 +91,7 @@ if __name__ == '__main__':
     envActor.SetMapper(envMapper)
     envActor.GetProperty().SetColor(0, 1, 0)
     envActor.GetProperty().SetOpacity(0.5)
+    envActor.GetProperty().SetRepresentationToWireframe()
     ren.AddActor(envActor)
 
     particlePoints = vtk.vtkPoints()
@@ -156,6 +161,8 @@ if __name__ == '__main__':
     iren.fnames = iter(args.dyns)
     iren.points = particlePoints
     iren.pPolys = pPolys
+    iren.ePolys = ePolys
+    iren.hPolys = hPolys
     iren.RemoveObservers('KeyPressEvent')
     iren.AddObserver('KeyPressEvent', progress, 1.0)
     iren.Start()
