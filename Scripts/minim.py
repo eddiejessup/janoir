@@ -121,7 +121,6 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
         np.array([np.cos(theta0), np.sin(theta0), 0.0]))
 
     i_t, t = 0, 0.0
-    attached = False
     while t < t_max:
         # Propulsion
         v_propuls = up * v_propuls_0
@@ -177,16 +176,8 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
                      t=t, rp=rp, up=up, vh=v_hydro, ve=v_electro, vp=v_propuls)
             print(t)
 
-        if d_pc < d_max / 2.0 and not attached:
-            attached = True
-            t_attach = t
-        elif d_pc > d_max and attached:
-            return t - t_attach
-
         i_t += 1
         t += dt
-    else:
-        return np.inf
 
 
 if __name__ == '__main__':
