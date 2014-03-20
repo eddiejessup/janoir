@@ -83,7 +83,8 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     np.random.seed(seed)
     dim = 3
 
-    rc = np.zeros([dim])
+    rcs = np.zeros([2, dim])
+    rcs[0, 0] = -7.0
 
     # Translational diffusion constant
     D = D_sphere(T, visc, Rp)
@@ -108,7 +109,7 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     if out is not None:
         utils.makedirs_safe(os.path.join(args.out, 'dyn'))
         np.savez(os.path.join(args.out, 'static.npz'),
-                 rc=rc, Rc=Rc, Rp=Rp, L=L)
+                 rcs=rcs, Rc=Rc, Rp=Rp, L=L)
 
     rp = np.array([-(Rp + Rc) - d0] + (dim - 1) * [0.0])
     # up = utils.sphere_pick(n=1, d=dim)[0]
@@ -122,46 +123,49 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     i_t, t = 0, 0.0
     attached = False
     while t < t_max:
-        # Calculate useful distances
-        r_pc = rp - rc
-        u_pc = utils.vector_unit_nonull(r_pc)
-        s_pc = utils.vector_mag(r_pc)
-        h_pc = s_pc - Rc
-        d_pc = s_pc - Rc - Rp
-
         # Propulsion
         v_propuls = up * v_propuls_0
 
         # Translational diffusion
         v_diff = v_diff_0 * np.random.normal(size=dim)
 
-        # Electrostatic force (repulsive)
-        v_electro = F_to_v_p * F_electro_0 * np.exp(-d_pc / l_deb) * u_pc
+        v_hydro = v_electro = 0.0
+        for rc in rcs:
+            # Calculate useful distances
+            r_pc = rp - rc
+            u_pc = utils.vector_unit_nonull(r_pc)
+            s_pc = utils.vector_mag(r_pc)
+            h_pc = s_pc - Rc
+            d_pc = s_pc - Rc - Rp
 
-        # Hydrodynamics
-        # Hydrodynamic torque (aligns parallel)
-        # Definitions
-        u_o = up
-        u_perp = -u_pc
-        # Calculations
-        mag_u_o_perp = np.dot(u_o, u_perp)
-        u_o_perp = mag_u_o_perp * u_perp
-        u_o_par = u_o - u_o_perp
-        u_par = utils.vector_unit_nonull(u_o_par)
-        th_o_perp = np.arccos(mag_u_o_perp)
-        omega = v_hydro_0 * -2.0 * np.sin(-2.0 * th_o_perp) / h_pc ** 3
-        phi = omega * dt
-        th_n_perp = th_o_perp + phi
-        mag_u_n_perp = np.cos(th_n_perp)
-        mag_u_n_par = np.sqrt(1.0 - mag_u_n_perp ** 2)
-        u_n = mag_u_n_perp * u_perp + mag_u_n_par * u_par
-        up = u_n.copy()
-        # Hydrodynamic force (complicated)
-        v_hydro_perp = -2.0 * (1.0 - 3.0 * np.cos(th_o_perp) ** 2) * -u_perp
-        v_hydro_par = np.sin(-2.0 * th_o_perp) * u_par
-        v_hydro = v_hydro_0 * (v_hydro_par + v_hydro_perp) / h_pc ** 2
+            # Electrostatic force (repulsive)
+            v_electro += F_to_v_p * F_electro_0 * np.exp(-d_pc / l_deb) * u_pc
 
-        v = v_propuls + v_hydro + v_electro + v_diff
+            # Hydrodynamics
+            # Hydrodynamic torque (aligns parallel)
+            # Definitions
+            u_o = up
+            u_perp = -u_pc
+            # Calculations
+            mag_u_o_perp = np.dot(u_o, u_perp)
+            u_o_perp = mag_u_o_perp * u_perp
+            u_o_par = u_o - u_o_perp
+            u_par = utils.vector_unit_nonull(u_o_par)
+            th_o_perp = np.arccos(mag_u_o_perp)
+            omega = v_hydro_0 * -2.0 * np.sin(-2.0 * th_o_perp) / h_pc ** 3
+            phi = omega * dt
+            th_n_perp = th_o_perp + phi
+            mag_u_n_perp = np.cos(th_n_perp)
+            mag_u_n_par = np.sqrt(1.0 - mag_u_n_perp ** 2)
+            u_n = mag_u_n_perp * u_perp + mag_u_n_par * u_par
+            up = u_n.copy()
+            # Hydrodynamic force (complicated)
+            v_hydro_perp = -2.0 * \
+                (1.0 - 3.0 * np.cos(th_o_perp) ** 2) * -u_perp
+            v_hydro_par = np.sin(-2.0 * th_o_perp) * u_par
+            v_hydro += v_hydro_0 * (v_hydro_par + v_hydro_perp) / h_pc ** 2
+
+        v = v_propuls + v_diff + v_hydro + v_electro
 
         rp += v * dt
         rp = wrap(rp, L)
