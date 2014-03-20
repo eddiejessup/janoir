@@ -43,8 +43,8 @@ if __name__ == '__main__':
 
     dirname = os.path.join(os.path.dirname(os.path.commonprefix(args.dyns)), '..')
     stat = np.load(os.path.join(dirname, 'static.npz'))
-    rc, Rc, Rp, L = stat['rc'], stat['Rc'], stat['Rp'], stat['L']
-    rc = butils.pad_to_3d(rc)
+    rcs, Rc, Rp, L = stat['rcs'], stat['Rc'], stat['Rp'], stat['L']
+    rcs = butils.pad_to_3d(rcs)
 
     ren = vtk.vtkRenderer()
     renWin = vtk.vtkRenderWindow()
@@ -75,7 +75,7 @@ if __name__ == '__main__':
         ren.AddActor(sysActor)
 
     points = vtk.vtkPoints()
-    points.SetData(numpy_support.numpy_to_vtk(rc))
+    points.SetData(numpy_support.numpy_to_vtk(rcs))
     polypoints = vtk.vtkPolyData()
     polypoints.SetPoints(points)
     sphereSource = vtk.vtkSphereSource()
