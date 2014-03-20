@@ -6,10 +6,8 @@ import numpy as np
 import utils
 import os
 import scipy.spatial
+import hcp
 
-
-d0 = 3.0
-d_max = 2.0
 
 # Defaults, best physical estimates
 v_propuls_0 = 5.0
@@ -21,6 +19,11 @@ alpha = 5.0
 kb = 1.38e-11
 T = 300.0
 electro_energy = 1e-4
+
+gap = 0.1
+c_sep = 2.0 * (Rp + gap)
+
+d0 = gap
 
 
 def R_rot(th):
@@ -83,8 +86,9 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     np.random.seed(seed)
     dim = 3
 
-    rcs = np.zeros([2, dim])
-    rcs[0, 0] = -7.0
+    r_hcp = hcp.hex_lattice(2) * (2.0 * Rc + c_sep)
+    rcs = np.zeros([len(r_hcp), dim])
+    rcs[:, :2] = r_hcp
 
     # Translational diffusion constant
     D = D_sphere(T, visc, Rp)
