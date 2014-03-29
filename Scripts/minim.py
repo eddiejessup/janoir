@@ -40,7 +40,7 @@ def rotate(u, th):
 
 
 def rot_diff(u, D, dt):
-    return rotate(u, np.sqrt(3.0 * D * dt) * np.random.normal(size=3))
+    return rotate(u, np.sqrt(2.0 * D * dt) * np.random.normal(size=3))
 
 
 def drag_sphere(visc, R):
