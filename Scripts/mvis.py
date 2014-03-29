@@ -6,28 +6,27 @@ from vtk.util import numpy_support
 import butils
 import argparse
 import os
-import utils
 
-d_scale = 0.3
+d_scale = 1.0
 
 
-def progress(obj, ev):
-    fname = obj.fnames.next()
+def progress_renwin(renWin):
+    fname = renWin.fnames.next()
     dyn = np.load(fname.strip())
     rp = butils.pad_to_3d(np.array([dyn['rp']]))
+    renWin.points.SetData(numpy_support.numpy_to_vtk(rp))
 
-    obj.points.SetData(numpy_support.numpy_to_vtk(rp))
+    for points, key in zip(renWin.point_sets, ['vp', 'vh', 've']):
+        v = butils.pad_to_3d(np.array([dyn[key]]))
+        print(key, v)
+        points.SetVectors(numpy_support.numpy_to_vtk(v))
 
-    vp = butils.pad_to_3d(np.array([dyn['vp']]))
-    obj.pPolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(vp))
+        renWin.Render()
+    return fname
 
-    vh = butils.pad_to_3d(np.array([dyn['vh']]))
-    obj.hPolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(vh))
 
-    ve = butils.pad_to_3d(np.array([dyn['ve']]))
-    obj.ePolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(ve))
-
-    renWin.Render()
+def progress_iren(obj, *args, **kwargs):
+    progress_renwin(obj.GetRenderWindow())
 
 
 if __name__ == '__main__':
@@ -41,7 +40,8 @@ if __name__ == '__main__':
 
     datdir = os.path.abspath(os.path.join(args.dyns[0], '../..'))
 
-    dirname = os.path.join(os.path.dirname(os.path.commonprefix(args.dyns)), '..')
+    dirname = os.path.join(
+        os.path.dirname(os.path.commonprefix(args.dyns)), '..')
     stat = np.load(os.path.join(dirname, 'static.npz'))
     rcs, Rc, Rp, L = stat['rcs'], stat['Rc'], stat['Rp'], stat['L']
     rcs = butils.pad_to_3d(rcs)
@@ -113,83 +113,41 @@ if __name__ == '__main__':
     ren.AddActor(particlesActor)
 
     dSource = vtk.vtkArrowSource()
-    # dSource.SetTipResolution(1)
-    # dSource.SetShaftResolution(1)
 
-    pPolys = vtk.vtkPolyData()
-    pPolys.SetPoints(particlePoints)
-    ps = vtk.vtkGlyph3D()
-    ps.SetSourceConnection(dSource.GetOutputPort())
-    ps.SetInputData(pPolys)
-    ps.SetScaleModeToScaleByVector()
-    ps.SetScaleFactor(d_scale)
-    pMapper = vtk.vtkPolyDataMapper()
-    pMapper.SetInputConnection(ps.GetOutputPort())
-    pActor = vtk.vtkActor()
-    pActor.SetMapper(pMapper)
-    pActor.GetProperty().SetColor(1, 0, 0)
-    ren.AddActor(pActor)
+    pPoint_sets, ps, pMappers, pActors = [], [], [], []
+    for c in ((1, 0, 0), (0, 0, 1), (1, 1, 0)):
+        polys = vtk.vtkPolyData()
+        polys.SetPoints(particlePoints)
+        p = vtk.vtkGlyph3D()
+        p.SetSourceConnection(dSource.GetOutputPort())
+        p.SetInputData(polys)
+        p.SetScaleModeToScaleByVector()
+        p.SetScaleFactor(d_scale)
+        mapper = vtk.vtkPolyDataMapper()
+        mapper.SetInputConnection(p.GetOutputPort())
+        actor = vtk.vtkActor()
+        actor.SetMapper(mapper)
+        actor.GetProperty().SetColor(*c)
+        ren.AddActor(actor)
 
-    hPolys = vtk.vtkPolyData()
-    hPolys.SetPoints(particlePoints)
-    hs = vtk.vtkGlyph3D()
-    hs.SetSourceConnection(dSource.GetOutputPort())
-    hs.SetInputData(hPolys)
-    hs.SetScaleModeToScaleByVector()
-    hs.SetScaleFactor(d_scale)
-    hMapper = vtk.vtkPolyDataMapper()
-    hMapper.SetInputConnection(hs.GetOutputPort())
-    hActor = vtk.vtkActor()
-    hActor.SetMapper(hMapper)
-    hActor.GetProperty().SetColor(0, 0, 1)
-    ren.AddActor(hActor)
+        pPoint_sets.append(polys.GetPointData())
+        ps.append(p)
+        pMappers.append(mapper)
+        pActors.append(actor)
 
-    ePolys = vtk.vtkPolyData()
-    ePolys.SetPoints(particlePoints)
-    es = vtk.vtkGlyph3D()
-    es.SetSourceConnection(dSource.GetOutputPort())
-    es.SetInputData(ePolys)
-    es.SetScaleModeToScaleByVector()
-    es.SetScaleFactor(d_scale)
-    eMapper = vtk.vtkPolyDataMapper()
-    eMapper.SetInputConnection(es.GetOutputPort())
-    eActor = vtk.vtkActor()
-    eActor.SetMapper(eMapper)
-    eActor.GetProperty().SetColor(1, 1, 0)
-    ren.AddActor(eActor)
+    renWin.fnames = iter(args.dyns)
+    renWin.points = particlePoints
+    renWin.point_sets = pPoint_sets
 
-    iren.fnames = iter(args.dyns)
-    iren.points = particlePoints
-    iren.pPolys = pPolys
-    iren.ePolys = ePolys
-    iren.hPolys = hPolys
-    iren.RemoveObservers('KeyPressEvent')
-    iren.AddObserver('KeyPressEvent', progress, 1.0)
-    iren.Start()
-
-    # for fname in args.dyns:
-    #     dyn = np.load(fname.strip())
-    #     rp = butils.pad_to_3d(np.array([dyn['rp']]))
-
-    #     particlePoints.SetData(numpy_support.numpy_to_vtk(rp))
-
-    #     vp = butils.pad_to_3d(np.array([dyn['vp']]))
-    #     pPolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(vp))
-
-    #     vh = butils.pad_to_3d(np.array([dyn['vh']]))
-    #     hPolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(vh))
-
-    #     ve = butils.pad_to_3d(np.array([dyn['ve']]))
-    #     ePolys.GetPointData().SetVectors(numpy_support.numpy_to_vtk(ve))
-
-    #     renWin.Render()
-
-    #     if args.save:
-    #         print(fname)
-    #         outname = os.path.splitext(fname)[0]
-    #         winImFilt.Modified()
-    #         writer.SetFileName('{}.jpeg'.format(outname))
-    #         writer.Write()
-
-    # if not args.save:
-    #     iren.Start()
+    if not args.save:
+        iren.RemoveObservers('KeyPressEvent')
+        iren.AddObserver('KeyPressEvent', progress_iren, 1.0)
+        iren.Start()
+    else:
+        while True:
+            fname = progress_renwin(renWin)
+            print(fname)
+            outname = os.path.splitext(fname)[0]
+            winImFilt.Modified()
+            writer.SetFileName('{}.jpg'.format(outname))
+            writer.Write()
