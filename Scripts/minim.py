@@ -16,8 +16,7 @@ Rp = 1.0
 visc = 8.9e-10
 l_deb = 0.01
 alpha = 5.0
-kb = 1.38e-11
-T = 300.0
+T = 10.0
 electro_energy = 1e-4
 
 gap = 0.1
@@ -44,16 +43,20 @@ def rot_diff(u, D, dt):
     return rotate(u, np.sqrt(3.0 * D * dt) * np.random.normal(size=3))
 
 
-def D_sphere(T, visc, R, kb=kb):
-    return (kb * T) / (6 * np.pi * visc * R)
+def drag_sphere(visc, R):
+    return 6.0 * np.pi * visc * R
 
 
-def fric_sphere(visc, R):
+def D_sphere(T, visc, R):
+    return scipy.constants.k * T / drag_sphere(visc, R)
+
+
+def drag_rot_sphere(visc, R):
     return 8.0 * np.pi * visc * R ** 3
 
 
-def D_rot_sphere(T, visc, R, kb=kb):
-    return kb * T / fric_sphere(visc, R)
+def D_rot_sphere(T, visc, R):
+    return scipy.constants.k * T / drag_rot_sphere(visc, R)
 
 
 def F_to_v(visc, R):
@@ -80,7 +83,7 @@ def wrap(r, L):
 
 
 def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
-          Rc=Rc, Rp=Rp, visc=visc, l_deb=l_deb, alpha=alpha, kb=kb, T=T,
+          Rc=Rc, Rp=Rp, visc=visc, l_deb=l_deb, alpha=alpha, T=T,
           electro_energy=electro_energy,
           out=None, every=None, seed=None):
     np.random.seed(seed)
