@@ -198,8 +198,8 @@ if __name__ == '__main__':
     parser.add_argument('-L', type=float, default=np.inf)
     args = parser.parse_args()
 
-    # minim(args.t, args.dt, args.L, out=args.out,
-    #       every=args.every, seed=1, alpha=0.0)
+    minim(args.t, args.dt, args.L, out=args.out,
+          every=args.every, seed=1, alpha=5.0)
 
     seeds = [12]
     alphas = np.linspace(0.0, 8.0, 99)

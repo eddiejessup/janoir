@@ -18,7 +18,6 @@ def progress_renwin(renWin):
 
     for points, key in zip(renWin.point_sets, ['vp', 'vh', 've']):
         v = butils.pad_to_3d(np.array([dyn[key]]))
-        print(key, v)
         points.SetVectors(numpy_support.numpy_to_vtk(v))
 
         renWin.Render()
