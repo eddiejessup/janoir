@@ -60,7 +60,7 @@ def D_rot_sphere(T, visc, R):
 
 
 def F_to_v(visc, R):
-    return 1.0 / (6.0 * np.pi * visc * Rp)
+    return 1.0 / (6.0 * np.pi * visc * R)
 
 
 def points_points_sep(rs1, rs2, L):
