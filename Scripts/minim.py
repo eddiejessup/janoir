@@ -114,8 +114,8 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     F_to_v_p = F_to_v(visc, Rp)
 
     if out is not None:
-        utils.makedirs_safe(os.path.join(args.out, 'dyn'))
-        np.savez(os.path.join(args.out, 'static.npz'),
+        utils.makedirs_safe(os.path.join(out, 'dyn'))
+        np.savez(os.path.join(out, 'static.npz'),
                  rcs=rcs, Rc=Rc, Rp=Rp, L=L)
 
     rp = np.array([-(Rp + Rc) - d0] + (dim - 1) * [0.0])
