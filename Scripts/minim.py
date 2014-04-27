@@ -18,7 +18,7 @@ Rp = 1.0
 visc = 8.9e-10
 l_deb = 0.01
 alpha = 5.0
-T = 10.0
+T = 0.0
 electro_energy = 1e-4
 
 gap = 0.1
@@ -88,7 +88,7 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     np.random.seed(seed)
     dim = 2
 
-    r_hcp = hcp.hex_lattice(2) * (2.0 * Rc + c_sep)
+    r_hcp = hcp.hex_lattice(1) * (2.0 * Rc + c_sep)
     rcs = np.zeros([len(r_hcp), dim])
     rcs[:, :2] = r_hcp
 
@@ -206,10 +206,10 @@ if __name__ == '__main__':
     parser.add_argument('-L', type=float, default=np.inf)
     args = parser.parse_args()
 
-    minim(args.t, args.dt, args.L, out=args.out,
-          every=args.every, seed=1, alpha=5.0)
+    # minim(args.t, args.dt, args.L, out=args.out,
+    #       every=args.every, seed=1, alpha=5.0)
 
-    seeds = [12]
+    seeds = range(5)
     alphas = np.linspace(0.0, 8.0, 99)
     header = '\n'.join(
         ['T {:f}'.format(T), 'dt {:f}'.format(args.dt), 't_max {:f}'.format(args.t)])
