@@ -28,13 +28,8 @@ d0 = gap
 
 
 def R_rot(th):
-    sx, sy, sz = np.sin(th)
-    cx, cy, cz = np.cos(th)
-    R = np.zeros((3, 3))
-    R[0, :] = cy * cz, -cy * sz, sy
-    R[1, :] = sx * sy * cz + cx * sz, -sx * sy * sz + cx * cz, -sx * cy
-    R[2, :] = -cx * sy * cz + sx * sz, cx * sy * sz + sx * cz, cx * cy
-    return R
+    s, c = np.sin(th), np.cos(th)
+    return np.array([[c, -s], [s, c]])
 
 
 def rotate(u, th):
@@ -42,7 +37,7 @@ def rotate(u, th):
 
 
 def rot_diff(u, D, dt):
-    return rotate(u, np.sqrt(2.0 * D * dt) * np.random.normal(size=3))
+    return rotate(u, np.sqrt(2.0 * D * dt) * np.random.normal())
 
 
 def drag_sphere(visc, R):
@@ -89,7 +84,7 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
           electro_energy=electro_energy,
           out=None, every=None, seed=None):
     np.random.seed(seed)
-    dim = 3
+    dim = 2
 
     r_hcp = hcp.hex_lattice(2) * (2.0 * Rc + c_sep)
     rcs = np.zeros([len(r_hcp), dim])
@@ -127,7 +122,7 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     # start active colloid set to graze fixed colloid tangentially
     theta0 = np.arcsin((Rc + Rp) / (Rc + Rp + d0))
     up = utils.vector_unit_nonull(
-        np.array([np.cos(theta0), np.sin(theta0), 0.0]))
+        np.array([np.cos(theta0), np.sin(theta0)]))
 
     i_t, t = 0, 0.0
     while t < t_max:
