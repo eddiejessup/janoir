@@ -16,11 +16,15 @@ def progress_renwin(renWin):
     rp = butils.pad_to_3d(np.array([dyn['rp']]))
     renWin.points.SetData(numpy_support.numpy_to_vtk(rp))
 
-    for points, key in zip(renWin.point_sets, ['vp', 'vh', 've']):
-        v = butils.pad_to_3d(np.array([dyn[key]]))
-        points.SetVectors(numpy_support.numpy_to_vtk(v))
+    keys = ['vp', 'vh', 've']
+    # Something to do with VTK messing up Python's garbage collection
+    # not sure why this is needed but it works anyway
+    vs = [None for i in range(len(keys))]
+    for i in range(len(renWin.point_sets)):
+        vs[i] = butils.pad_to_3d(np.array([dyn[keys[i]]]))
+        renWin.point_sets[i].SetVectors(numpy_support.numpy_to_vtk(vs[i]))
 
-        renWin.Render()
+    renWin.Render()
     return fname
 
 
