@@ -5,9 +5,11 @@ import argparse
 import numpy as np
 import utils
 import os
+import scipy.constants
 import scipy.spatial
 import hcp
 
+k = 1e12 * scipy.constants.k
 
 # Defaults, best physical estimates
 v_propuls_0 = 5.0
@@ -48,7 +50,7 @@ def drag_sphere(visc, R):
 
 
 def D_sphere(T, visc, R):
-    return scipy.constants.k * T / drag_sphere(visc, R)
+    return k * T / drag_sphere(visc, R)
 
 
 def drag_rot_sphere(visc, R):
@@ -56,7 +58,7 @@ def drag_rot_sphere(visc, R):
 
 
 def D_rot_sphere(T, visc, R):
-    return scipy.constants.k * T / drag_rot_sphere(visc, R)
+    return k * T / drag_rot_sphere(visc, R)
 
 
 def F_to_v(visc, R):
