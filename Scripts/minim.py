@@ -24,7 +24,9 @@ electro_energy = 1e-4
 gap = 0.1
 c_sep = 2.0 * (Rp + gap)
 
-d0 = gap
+d0 = 3.0
+d_attach = 1.0
+d_detach = 2.0
 
 
 def R_rot(th):
@@ -124,6 +126,7 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
     up = utils.vector_unit_nonull(
         np.array([np.cos(theta0), np.sin(theta0)]))
 
+    attached = False
     i_t, t = 0, 0.0
     while t < t_max:
         # Propulsion
@@ -180,8 +183,16 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
                      t=t, rp=rp, up=up, vh=v_hydro, ve=v_electro, vp=v_propuls)
             print(t)
 
+        if d_pc < d_attach and not attached:
+            attached = True
+            t_attach = t
+        elif d_pc > d_detach and attached:
+            return t - t_attach
+
         i_t += 1
         t += dt
+    else:
+        return np.inf
 
 
 if __name__ == '__main__':
@@ -212,8 +223,8 @@ if __name__ == '__main__':
             taus.append(tau)
             if tau == np.inf:
                 break
-    # If last leaving time was infinite, assume rest are too
-    # but nan instead of inf to show hasn't actually been calculated
+        # If last leaving time was infinite, assume rest are too
+        # but nan instead of inf to show hasn't actually been calculated
         taus += [np.nan] * (len(alphas) - len(taus))
-        np.savetxt('../Data/tau_alpha_T/T_{:.2f}_{:d}_temp.csv'.format(
+        np.savetxt('../Data/2d/tau_alpha_T/T_{:.2f}_{:d}_temp.csv'.format(
             T, seed), zip(alphas, taus), header=header)
