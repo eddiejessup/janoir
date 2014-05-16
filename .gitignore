@@ -1,3 +1,4 @@
 Data/
 Documents/
 *.pyc
+.ipynb_checkpoints/
