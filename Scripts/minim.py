@@ -17,13 +17,14 @@ Rc = 3.5
 Rp = 1.0
 visc = 8.9e-10
 l_deb = 0.01
-alpha = 5.0
-T = 0.0
+alpha = 4.0
+T = 300.0
 electro_energy = 1e-4
 
 gap = 0.1
 c_sep = 2.0 * (Rp + gap)
 
+# d0 = gap
 d0 = 3.0
 d_attach = 1.0
 d_detach = 2.0
@@ -207,24 +208,24 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # minim(args.t, args.dt, args.L, out=args.out,
-    #       every=args.every, seed=1, alpha=5.0)
+    #       every=args.every, seed=1, v_propuls_0=5.0)
 
-    seeds = range(5)
-    alphas = np.linspace(0.0, 8.0, 99)
+    seeds = range(21, 31)
+    vs = np.linspace(3.0, 20.0, 100)
     header = '\n'.join(
         ['T {:f}'.format(T), 'dt {:f}'.format(args.dt), 't_max {:f}'.format(args.t)])
     for seed in seeds:
         taus = []
         print('seed {}'.format(seed))
-        for alpha in alphas:
+        for v in vs:
             tau = minim(args.t, args.dt, args.L,
-                        out=args.out, every=args.every, alpha=alpha, T=T, seed=seed)
-            print('alpha {} tau {}'.format(alpha, tau))
+                        out=args.out, every=args.every, v_propuls_0=v, T=T, seed=seed)
+            print('v {} tau {}'.format(v, tau))
             taus.append(tau)
             if tau == np.inf:
                 break
         # If last leaving time was infinite, assume rest are too
         # but nan instead of inf to show hasn't actually been calculated
-        taus += [np.nan] * (len(alphas) - len(taus))
-        np.savetxt('../Data/2d/tau_alpha_T/T_{:.2f}_{:d}_temp.csv'.format(
-            T, seed), zip(alphas, taus), header=header)
+        taus += [np.nan] * (len(vs) - len(taus))
+        np.savetxt('../Data/2d/tau_v_T/T_{:.2f}_{:d}_temp.csv'.format(
+            T, seed), zip(vs, taus), header=header)
