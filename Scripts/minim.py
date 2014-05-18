@@ -82,7 +82,7 @@ def wrap(r, L):
             return r
 
 
-def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
+def minim(dt, t_max=np.inf, L=np.inf, v_propuls_0=v_propuls_0,
           Rc=Rc, Rp=Rp, visc=visc, l_deb=l_deb, alpha=alpha, T=T,
           electro_energy=electro_energy,
           out=None, every=None, seed=None):
@@ -197,35 +197,12 @@ def minim(t_max, dt, L, v_propuls_0=v_propuls_0,
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(
-        description='Simulate active particles in an HCP lattice')
-    parser.add_argument('-o', '--out',
-                        help='Output directory')
-    parser.add_argument('-t', type=float, default=np.inf)
+    parser = argparse.ArgumentParser(description='Simulate active particles in an HCP lattice')
+    parser.add_argument('-o', '--out', help='Output directory')
+    parser.add_argument('-t', type=float)
     parser.add_argument('-dt', type=float)
     parser.add_argument('-e', '--every', type=int)
-    parser.add_argument('-L', type=float, default=np.inf)
+    parser.add_argument('-L', type=float)
     args = parser.parse_args()
 
-    # minim(args.t, args.dt, args.L, out=args.out,
-    #       every=args.every, seed=1, v_propuls_0=5.0)
-
-    seeds = range(21, 31)
-    vs = np.linspace(3.0, 20.0, 100)
-    header = '\n'.join(
-        ['T {:f}'.format(T), 'dt {:f}'.format(args.dt), 't_max {:f}'.format(args.t)])
-    for seed in seeds:
-        taus = []
-        print('seed {}'.format(seed))
-        for v in vs:
-            tau = minim(args.t, args.dt, args.L,
-                        out=args.out, every=args.every, v_propuls_0=v, T=T, seed=seed)
-            print('v {} tau {}'.format(v, tau))
-            taus.append(tau)
-            if tau == np.inf:
-                break
-        # If last leaving time was infinite, assume rest are too
-        # but nan instead of inf to show hasn't actually been calculated
-        taus += [np.nan] * (len(vs) - len(taus))
-        np.savetxt('../Data/2d/tau_v_T/T_{:.2f}_{:d}_temp.csv'.format(
-            T, seed), zip(vs, taus), header=header)
+    minim(args.dt, args.t, args.L, out=args.out, every=args.every, seed=1, v_propuls_0=5.0)
