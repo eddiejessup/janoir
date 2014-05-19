@@ -6,23 +6,29 @@ import sys
 import scipy.stats
 
 
-def mean(fnames, out):
-    ts, als = [], []
+def mean(fnames, out, median):
+    xs, ys = [], []
     for fname in fnames:
-        t, al = np.loadtxt(fname, unpack=True)
-        ts.append(t)
-        als.append(al)
+        x, y = np.loadtxt(fname, unpack=True)
+        xs.append(x)
+        ys.append(y)
 
-    als = np.array(als)
-    ts = np.array(ts)
+    ys = np.array(ys)
+    xs = np.array(xs)
 
-    np.savetxt(
-        # out, zip(np.mean(ts, axis=0), np.nanmean(als, axis=0), scipy.stats.sem(als, axis=0)))
-        out, zip(np.mean(ts, axis=0), np.median(als, axis=0), scipy.stats.sem(als, axis=0)))
+    if median:
+        y_av = np.median(ys, axis=0)
+    else:
+        y_av = np.nanmean(ys, axis=0)
+
+    y_err = scipy.stats.sem(ys, axis=0)
+
+    np.savetxt(out, zip(np.mean(xs, axis=0), y_av, y_err))
 
 parser = argparse.ArgumentParser(description='Mean fnames')
 parser.add_argument('fnames', nargs='*')
 parser.add_argument('-o', '--out')
+parser.add_argument('--median', default=False, action='store_true')
 args = parser.parse_args()
 
-mean(args.fnames, args.out)
+mean(args.fnames, args.out, args.median)
