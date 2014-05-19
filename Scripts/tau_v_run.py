@@ -4,8 +4,7 @@ import minim
 
 
 def tau_of_v((dt, t, seed)):
-    # vs = np.linspace(3.0, 20.0, 100)
-    vs = np.linspace(3.0, 20.0, 2)
+    vs = np.linspace(3.0, 20.0, 100)
     taus = []
     for v in vs:
         tau = minim.minim(dt, t, v_propuls_0=v, seed=seed)
