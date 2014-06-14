@@ -1,3 +1,6 @@
 Data/
 Documents/
 *.pyc
+.DS_Store
+*.png
+*.pdf
