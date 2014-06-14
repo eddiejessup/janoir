@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from __future__ import print_function, division
+
 import argparse
 import numpy as np
 import utils
@@ -219,4 +219,4 @@ if __name__ == '__main__':
     # but nan instead of inf to show hasn't actually been calculated
         taus += [np.nan] * (len(alphas) - len(taus))
         np.savetxt('../Data/tau_alpha_T/T_{:.2f}_{:d}_temp.csv'.format(
-            T, seed), zip(alphas, taus), header=header)
+            T, seed), list(zip(alphas, taus)), header=header)

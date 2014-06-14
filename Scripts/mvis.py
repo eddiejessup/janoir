@@ -11,7 +11,7 @@ d_scale = 1.0
 
 
 def progress_renwin(renWin):
-    fname = renWin.fnames.next()
+    fname = next(renWin.fnames)
     dyn = np.load(fname.strip())
     rp = butils.pad_to_3d(np.array([dyn['rp']]))
     renWin.points.SetData(numpy_support.numpy_to_vtk(rp))

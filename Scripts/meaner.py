@@ -14,4 +14,4 @@ for fname in sys.argv[1:-1]:
 als = np.array(als)
 ts = np.array(ts)
 
-np.savetxt(sys.argv[-1], zip(np.mean(ts, axis=0), np.nanmean(als, axis=0), scipy.stats.sem(als, axis=0)))
+np.savetxt(sys.argv[-1], list(zip(np.mean(ts, axis=0), np.nanmean(als, axis=0), scipy.stats.sem(als, axis=0))))
