@@ -3,7 +3,8 @@ import multiprocessing
 import minim
 
 
-def tau_of_v((dt, t, seed)):
+def tau_of_v(params):
+    dt, t, seed = params
     vs = np.linspace(3.0, 20.0, 100)
     taus = []
     for v in vs:
@@ -17,7 +18,7 @@ def tau_of_v((dt, t, seed)):
     taus += [np.nan] * (len(vs) - len(taus))
     header = '\n'.join(['dt {:f}'.format(dt), 't_max {:f}'.format(t)])
     np.savetxt('../Data/2d/tau_v_300K/{:d}.csv'.format(
-        seed), zip(vs, taus), header=header)
+        seed), list(zip(vs, taus)), header=header)
 
 
 if __name__ == '__main__':

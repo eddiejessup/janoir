@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from __future__ import print_function, division
+
 import argparse
 import numpy as np
 import utils

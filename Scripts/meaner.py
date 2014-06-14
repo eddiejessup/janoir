@@ -23,7 +23,7 @@ def mean(fnames, out, median):
 
     y_err = scipy.stats.sem(ys, axis=0)
 
-    np.savetxt(out, zip(np.mean(xs, axis=0), y_av, y_err))
+    np.savetxt(out, list(zip(np.mean(xs, axis=0), y_av, y_err)))
 
 parser = argparse.ArgumentParser(description='Mean fnames')
 parser.add_argument('fnames', nargs='*')

@@ -3,7 +3,8 @@ import multiprocessing
 import minim
 
 
-def tau_of_alpha((dt, t, seed)):
+def tau_of_alpha(params):
+    dt, t, seed = params
     alphas = np.linspace(0.0, 10.0, 100)
     taus = []
     for alpha in alphas:
@@ -17,7 +18,7 @@ def tau_of_alpha((dt, t, seed)):
     taus += [np.nan] * (len(alphas) - len(taus))
     header = '\n'.join(['dt {:f}'.format(dt), 't_max {:f}'.format(t)])
     np.savetxt('../Data/2d/tau_alpha_300K/{:d}.csv'.format(
-        seed), zip(alphas, taus), header=header)
+        seed), list(zip(alphas, taus)), header=header)
 
 
 if __name__ == '__main__':
