@@ -11,6 +11,9 @@ d_scale = 1.0
 
 
 def progress_renwin(renWin):
+    iren = renWin.GetInteractor()
+    key = iren.GetKeySym()
+    print(key)
     fname = next(renWin.fnames)
     dyn = np.load(fname.strip())
     rp = butils.pad_to_3d(np.array([dyn['rp']]))
